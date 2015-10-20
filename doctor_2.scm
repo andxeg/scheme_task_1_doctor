@@ -3,7 +3,7 @@
   (define (doctor-driver-loop name)
     (define (reply user-response)
       (define (change-person phrase)
-        (many-replace '((i you) (I you) (me you) (am are) (my your) (you i) (You i) (are am) (your my)) phrase))
+        (many-replace '((i you) (I you) (me you) (am are) (my your) (you me) (You Me) (are am) (your my)) phrase))
 
       (define (qualifier)
         (pick-random '((you seem to think)
@@ -24,7 +24,7 @@
                        (can you say in more detail about your problem)
                        (Do you believe in what you said)
                        (We are on the right track)
-                       (If you need anything, just ask)ы
+                       (If you need anything, just ask)
                        (Make yourself at home)
                        (How long have you had these thoughts)
                        (If you could wave a magic wand what positive changes would you make happen in your life)))
