@@ -1,5 +1,5 @@
 #lang scheme/base
-(define (visit-doctor name)
+(define (visit-doctor)
   (define (doctor-driver-loop name old-phrases)
     (define (reply user-response)
       ;(define (change-person phrase)
@@ -38,8 +38,6 @@
                (else (random 3)))
       )
       ;(define (fifty-fifty) 1)
-      ;чтобы в самом начале не выполнялась ветвь с (early you said that) можно эту функцию засунуть в reply
-      ;и сделать проверку if old-phrases.is_empty => random 2 -> будут выполняться qualifier and hedge
       
        (case (fifty-fifty)
          ( (0) (append (qualifier) (change-person '((i you) (I you) (me you) (am are) (my your) (you i) (You I) (are am) (your my)) user-response)))
@@ -66,7 +64,8 @@
       (cond ((equal? user-response '(goodbye))
              (printf "Goodbye, ~a!\n" name)
              (print '(see you next week))
-             (print old-phrases))
+             (print old-phrases)
+             (newline))
             (else (print old-phrases)
                   (print (reply user-response))
                   ;standart push| old-phrases is a vector
@@ -76,9 +75,23 @@
                   
   )
 
-  (printf "Hello, ~a!\n" name)
-  (print '(what seems to be the trouble?))
-  (doctor-driver-loop name '())
+  (define (ask-patient-name)
+    (begin
+    (print '(NEXT!))
+    (newline)
+    (print '(Who are you?))
+    (car (read))))
+
+  (define name (ask-patient-name))
+  (cond ((equal? name 'suppertime) (print '(Time to sleep)))
+        (else (begin
+                     (printf "Hello, ~a!\n" name)
+                     (print '(what seems to be the trouble?))
+                     (doctor-driver-loop name '())
+                     (visit-doctor)
+               )
+        )
+  )
 )
 
 
