@@ -3,7 +3,7 @@
   (define (doctor-driver-loop name)
     (define (reply user-response)
       (define (change-person phrase)
-        (many-replace '((i you) (I you) (me you) (am are) (my your) (you me) (You Me) (are am) (your my)) phrase))
+        (many-replace '((i you) (I you) (me you) (am are) (my your) (you i) (You I) (are am) (your my)) phrase))
 
       (define (qualifier)
         (pick-random '((you seem to think)
