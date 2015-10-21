@@ -32,12 +32,32 @@
                        (How long have you had these thoughts)
                        (If you could wave a magic wand what positive changes would you make happen in your life)))
       )
+
+      (define (fifty-fifty)
+        ( cond ((null? old-phrases) (random 2) )
+               (else (random 3)))
+      )
+      ;(define (fifty-fifty) 1)
+      ;чтобы в самом начале не выполнялась ветвь с (early you said that) можно эту функцию засунуть в reply
+      ;и сделать проверку if old-phrases.is_empty => random 2 -> будут выполняться qualifier and hedge
       
        (case (fifty-fifty)
          ( (0) (append (qualifier) (change-person '((i you) (I you) (me you) (am are) (my your) (you i) (You I) (are am) (your my)) user-response)))
-         ( (1) (cond ((null? old-phrases) '(You haven't said anything before that))
+         ( (2) (cond ((null? old-phrases) '(You haven't said anything before that))
                (else (append '(early you said that) (change-person '((i you) (I you) (me you) (am are) (my your) (you i) (You I) (are am) (your my)) (pick-random old-phrases))))))
-         ( else (hedge)))
+         ( (1) (hedge))
+         ( else '(Error)))
+    )
+
+    (define (unique-push element vector)
+        (cond ((null? vector) ( cons element vector))
+              (else (let ((curr-element (car vector)))
+                      (cond ((equal? curr-element element) vector)
+                            (else (cons curr-element (unique-push element (cdr vector))))
+                      )
+                    )
+              )
+        )
     )
 
     (newline)
@@ -49,7 +69,11 @@
              (print old-phrases))
             (else (print old-phrases)
                   (print (reply user-response))
-                  (doctor-driver-loop name (cons user-response old-phrases)))))
+                  ;standart push| old-phrases is a vector
+                  ;(doctor-driver-loop name (cons user-response old-phrases)))))
+                  ;unique push| old-phrases is a set
+                  (doctor-driver-loop name (unique-push user-response old-phrases)))))
+                  
   )
 
   (printf "Hello, ~a!\n" name)
@@ -57,8 +81,6 @@
   (doctor-driver-loop name '())
 )
 
-(define (fifty-fifty) (random 3))
-;(define (fifty-fifty) 1)
 
 (define (replace replacement-pairs word)
   (cond ((null? replacement-pairs) word)
