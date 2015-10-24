@@ -133,7 +133,8 @@
       )
 
       ;Задание №6 1. Предикаты и соответствующий им список функций
-      (define pred-F '( ( (lambda (x) (< (length x) 3)) test)
+      (define pred-F '( ( (lambda (x) (< (length x) 3)) test1 test2)
+                        ( (lambda (x) (< (length x) 2)) test3 test4 )
                         ( (lambda (x) (> (length x) 4)) trite-expression)
                       )
       )
@@ -228,9 +229,27 @@
 
 
      
-(define (test client-response)
+(define (test1 client-response)
   (list
-   '(test function)
+   '(test1)
+  )
+)
+
+(define (test2 client-response)
+  (list
+   '(test2)
+  )
+)
+
+(define (test3 client-response)
+  (list
+   '(test3)
+  )
+)
+
+(define (test4 client-response)
+  (list
+   '(test4)
   )
 )
 
