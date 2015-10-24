@@ -46,13 +46,22 @@
              (depression is a disease that can be threated)
           )
           ((mother father family parents)
-           (tell me more about your family)
-           (why do you feel that way about your parents?)
+           (tell me more about your *)
+           (why do you feel that way about your * ?)
+           (Are your * good?)
           )
          )
       )
 
-      ;Задание №5. 4.
+      ;Задание №5. 5. Заменяем в списке все '* на word и возвращаем полученный список в качестве результата
+      (define (replace-all-words-in-lst word lst)
+        (cond ((null? lst) lst)
+              ((equal? '* (car lst)) ( cons word (replace-all-words-in-lst word (cdr lst))))
+              (else (cons (car lst) (replace-all-words-in-lst word (cdr lst))))
+        )
+      )
+
+      ;Задание №5. 4. Проверяет наличие word в списке lst
       (define (exist? word lst)
         (cond ((null? lst) #f)
               ((equal? word (car lst)) #t)
@@ -62,12 +71,17 @@
       
       ;Задание №5. 3. Проверяем наличие word в первом подсписке keys, если есть,
       ;то возвращаем рандомный подсписок, отличный от первого(в котором хранятся ключевые слова)
+      ;Если во втором подсписке списка keys есть символ '*, то выбираем произвольную фразу из (cdr keys)
+      ;и вызываем функцию replace-all-words-in-lst
       (define (check-keys word keys)
-        (cond ((exist? word (car keys)) (pick-random (cdr keys)))
+        (cond ((exist? word (car keys))
+                (cond ((exist? '* (cadr keys)) (replace-all-words-in-lst word (pick-random (cdr keys))))
+                      ( else (pick-random (cdr keys)))
+                )
+              )
               (else '())
         )
       )
-
 
       ;Задание №5. 2. Для каждого keys из keyslst вызываем функцию check-all-keys
       (define (check-all-keys keyslst word)
@@ -92,7 +106,6 @@
               )
         )
       )
-      
       
       (case (fifty-fifty)
          ( (0) (append (qualifier) (change-person '((i you) (I you) (me you) (am are) (my your) (you i) (You I) (are am) (your my)) user-response)))
