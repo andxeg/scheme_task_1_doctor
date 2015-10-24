@@ -87,8 +87,8 @@
       (define (check-all-keys keyslst word)
         (cond ((null? keyslst) '())
               (else (let ((result (check-keys word (car keyslst))))
-                      (if (null? result) (check-all-keys (cdr keyslst) word)
-                          result
+                      ( if (null? result) (check-all-keys (cdr keyslst) word)
+                           result
                       )
                     )
               )
@@ -100,7 +100,7 @@
         (cond ((null? lst) '())
               (else (let ((result (check-all-keys keyslst (car lst))))
                       (if (null? result) (check-key-words (cdr lst) keyslst)
-                          result
+                          (cons result (check-key-words (cdr lst) keyslst))
                       )
                     )
               )
