@@ -33,11 +33,11 @@
                        (If you could wave a magic wand what positive changes would you make happen in your life)))
       )
 
-      ;(define (fifty-fifty)
-      ;  ( cond ((null? old-phrases) (random 3) )
-      ;         (else (random 4)))
-      ;)
-      (define (fifty-fifty) 2)
+      (define (fifty-fifty)
+        ( cond ((null? old-phrases) (random 3) )
+               (else (random 4)))
+      )
+      ;(define (fifty-fifty) 2)
 
       ;Задание №5. Список списков вида ( (key1 ... keyN) (seq1) ... (seqM) )
       (define KEYWORDS-LIST
@@ -107,38 +107,80 @@
         )
       )
 
-      ;Все функции, реализующие различные стратегии ответа должны иметь функции обертки, которые имеют только один входной параметр user-response
+      ;Все функции, реализующие различные стратегии ответа должны иметь функции обертки, которые имеют один входной параметр user-response
       ;Задание №5. 1. Обертка для check-key-words
       (define (keywords-strategy client-response)
         (check-key-words client-response KEYWORDS-LIST)
       )
 
       (define (trite-expression client-response)
-        (hedge)
+        (list
+         (hedge)
+         )
       )
 
       (define (answer-old-phrase client-response)
-        (cond ((null? old-phrases) '(You haven't said anything before that))
+        (list
+         (cond ((null? old-phrases) '(You haven't said anything before that))
                (else (append '(early you said that) (change-person '((i you) (I you) (me you) (am are) (my your) (you i) (You I) (are am) (your my)) (pick-random old-phrases)))))
+        )
       )
 
       (define (answer-change-pronoun client-response)
-        (append (qualifier) (change-person '((i you) (I you) (me you) (am are) (my your) (you i) (You I) (are am) (your my)) client-response))
+        (list
+         (append (qualifier) (change-person '((i you) (I you) (me you) (am are) (my your) (you i) (You I) (are am) (your my)) client-response))
+        )
+      )
+
+      ;Задание №6 1. Предикаты и соответствующий им список функций
+      (define pred-F '( ( (lambda (x) (< (length x) 3)) test)
+                        ( (lambda (x) (> (length x) 4)) trite-expression)
+                      )
       )
       
-      (case (fifty-fifty)
-         ( (0) (answer-change-pronoun user-response))
-         ( (3) (answer-old-phrase user-response))
-         ( (1) (trite-expression user-response))
-         ( (2) ( let ((result (keywords-strategy user-response)))
-                      (if (null? result) (hedge) result)
-               )
-         )
-         ( else '(Error)))
+      ;Задание №6 2. Пробегаемся по списку, выполняем предикат (первый элемент каждого подсписка),
+      ;если #t, следовательно, выполняем рандомную функцию, соответсвующую данному предикату, иначе ничего не делаем
+      ;переходим к другому подсписку
+      (define (execute-strategy pred-func-lst client-response)
+        (cond ((null? pred-func-lst) '())
+              (else (let ((pred-func (car pred-func-lst)))
+                      ( if ((eval (car pred-func)) client-response)
+                           (let ((result ((eval(pick-random (cdr pred-func))) client-response)));вместо pick-random можно сделать выбор с некоторой вероятностью/весами
+                             (cond ((null? result) (execute-strategy (cdr pred-func-lst) client-response))
+                                   (else (append result (execute-strategy (cdr pred-func-lst) client-response)))
+                             )
+                           )
+                           (execute-strategy (cdr pred-func-lst) client-response)
+                      )
+                    )
+              )
+        )
+      )
+
+      ;New version - with predicates
+      (execute-strategy pred-F user-response
+      )
+ 
+      
+      ;Old version - without predicates
+      ;( cond ((equal? user-response '()) '(please go on))
+      ;       ( else
+      ;         (case (fifty-fifty)
+      ;           ( (0) (answer-change-pronoun user-response))
+      ;           ( (3) (answer-old-phrase user-response))
+      ;           ( (1) (trite-expression user-response))
+      ;           ( (2) ( let ((result (keywords-strategy user-response)))
+      ;                    (if (null? result) (trite-expression user-response) result)
+      ;                    )
+      ;                 )
+      ;           ( else '(Error)))
+      ;       )
+      ;)
     )
 
     (define (unique-push element vector)
-        (cond ((null? vector) ( cons element vector))
+        (cond ((equal? element '() ) vector)
+              ((null? vector) ( cons element vector))
               (else (let ((curr-element (car vector)))
                       (cond ((equal? curr-element element) vector)
                             (else (cons curr-element (unique-push element (cdr vector))))
@@ -184,6 +226,33 @@
   )
 )
 
+
+     
+(define (test client-response)
+  (list
+   '(test function)
+  )
+)
+
+;(define (hedge)
+;        (pick-random '((please go on)
+;                       (many people have the same sorts of feelings)
+;                       (many of my patients have told me the same thing)
+;                       (please continue)
+;                       (can you say in more detail about your problem)
+;                       (Do you believe in what you said)
+;                       (We are on the right track)
+;                       (If you need anything, just ask)
+;                       (Make yourself at home)
+;                       (How long have you had these thoughts)
+;                       (If you could wave a magic wand what positive changes would you make happen in your life)))
+;      )
+
+; (define (trite-expression client-response)
+;   (list
+;    (hedge)
+;   )
+;)
 
 (define (replace replacement-pairs word)
   (cond ((null? replacement-pairs) word)
