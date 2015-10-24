@@ -53,7 +53,7 @@
          )
       )
 
-      ;Задание №5. 5. Заменяем в списке все '* на word и возвращаем полученный список в качестве результата
+      ;Задание №5. 6. Заменяем в списке все '* на word и возвращаем полученный список в качестве результата
       (define (replace-all-words-in-lst word lst)
         (cond ((null? lst) lst)
               ((equal? '* (car lst)) ( cons word (replace-all-words-in-lst word (cdr lst))))
@@ -61,7 +61,7 @@
         )
       )
 
-      ;Задание №5. 4. Проверяет наличие word в списке lst
+      ;Задание №5. 5. Проверяет наличие word в списке lst
       (define (exist? word lst)
         (cond ((null? lst) #f)
               ((equal? word (car lst)) #t)
@@ -69,7 +69,7 @@
          )
       ) 
       
-      ;Задание №5. 3. Проверяем наличие word в первом подсписке keys, если есть,
+      ;Задание №5. 4. Проверяем наличие word в первом подсписке keys, если есть,
       ;то возвращаем рандомный подсписок, отличный от первого(в котором хранятся ключевые слова)
       ;Если во втором подсписке списка keys есть символ '*, то выбираем произвольную фразу из (cdr keys)
       ;и вызываем функцию replace-all-words-in-lst
@@ -83,7 +83,7 @@
         )
       )
 
-      ;Задание №5. 2. Для каждого keys из keyslst вызываем функцию check-all-keys
+      ;Задание №5. 3. Для каждого keys из keyslst вызываем функцию check-all-keys
       (define (check-all-keys keyslst word)
         (cond ((null? keyslst) '())
               (else (let ((result (check-keys word (car keyslst))))
@@ -95,7 +95,7 @@
         )
       )
       
-      ;Задание №5. 1.Пробегаемся по всем словам из ответа клиента вызываем функцию check-key-words
+      ;Задание №5. 2.Пробегаемся по всем словам из ответа клиента вызываем функцию check-key-words
       (define (check-key-words lst keyslst)
         (cond ((null? lst) '())
               (else (let ((result (check-all-keys keyslst (car lst))))
@@ -106,13 +106,31 @@
               )
         )
       )
+
+      ;Все функции, реализующие различные стратегии ответа должны иметь функции обертки, которые имеют только один входной параметр user-response
+      ;Задание №5. 1. Обертка для check-key-words
+      (define (keywords-strategy client-response)
+        (check-key-words client-response KEYWORDS-LIST)
+      )
+
+      (define (trite-expression client-response)
+        (hedge)
+      )
+
+      (define (answer-old-phrase client-response)
+        (cond ((null? old-phrases) '(You haven't said anything before that))
+               (else (append '(early you said that) (change-person '((i you) (I you) (me you) (am are) (my your) (you i) (You I) (are am) (your my)) (pick-random old-phrases)))))
+      )
+
+      (define (answer-change-pronoun client-response)
+        (append (qualifier) (change-person '((i you) (I you) (me you) (am are) (my your) (you i) (You I) (are am) (your my)) client-response))
+      )
       
       (case (fifty-fifty)
-         ( (0) (append (qualifier) (change-person '((i you) (I you) (me you) (am are) (my your) (you i) (You I) (are am) (your my)) user-response)))
-         ( (3) (cond ((null? old-phrases) '(You haven't said anything before that))
-               (else (append '(early you said that) (change-person '((i you) (I you) (me you) (am are) (my your) (you i) (You I) (are am) (your my)) (pick-random old-phrases))))))
-         ( (1) (hedge))
-         ( (2) ( let ((result (check-key-words user-response KEYWORDS-LIST)))
+         ( (0) (answer-change-pronoun user-response))
+         ( (3) (answer-old-phrase user-response))
+         ( (1) (trite-expression user-response))
+         ( (2) ( let ((result (keywords-strategy user-response)))
                       (if (null? result) (hedge) result)
                )
          )
