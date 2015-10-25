@@ -1,10 +1,9 @@
 #lang scheme/base
+
 (define (visit-doctor)
   (define (doctor-driver-loop name old-phrases)
     (define (reply user-response)
-      ;(define (change-person phrase)
-      ;  (many-replace '((i you) (I you) (me you) (am are) (my your) (you me) (You I) (are am) (your my)) phrase))
-
+      
       (define (change-person pairs phrase)
         (many-replace pairs phrase))
       
@@ -18,7 +17,7 @@
                        (It's very interesting What can you say except)
                        (We are clearly in the right direction, if you said)))
       )
-
+      
       (define (hedge)
         (pick-random '((please go on)
                        (many people have the same sorts of feelings)
@@ -37,7 +36,6 @@
         ( cond ((null? old-phrases) (random 3) )
                (else (random 4)))
       )
-      ;(define (fifty-fifty) 2)
 
       ;Задание №5. Список списков вида ( (key1 ... keyN) (seq1) ... (seqM) )
       (define KEYWORDS-LIST
@@ -50,7 +48,25 @@
            (why do you feel that way about your * ?)
            (Are your * good?)
           )
+          ((rain snow)
+           (Do you like *)
+           (What thoughts arise for you when the * ?)
+          )
          )
+      )
+
+      (define (keywords keywords-list)
+        (cond ((null? keywords-list) '())
+              (else (append (caar keywords-list) (keywords (cdr keywords-list )) ))
+        )
+      )
+
+      (define (intersect? lst1 lst2)
+        (cond ((null? lst1) #f)
+              ((null? lst2) #f)
+              ((exist? (car lst1) lst2) #t)
+              (else (intersect? (cdr lst1) lst2))
+        )
       )
 
       ;Задание №5. 6. Заменяем в списке все '* на word и возвращаем полученный список в качестве результата
@@ -133,20 +149,21 @@
       )
 
       ;Задание №6 1. Предикаты и соответствующий им список функций
-      (define pred-F '( ( (lambda (x) (< (length x) 3)) test1 test2)
-                        ( (lambda (x) (< (length x) 2)) test3 test4 )
-                        ( (lambda (x) (> (length x) 4)) trite-expression)
+      (define pred-F (  list ( list (lambda (x) (< (length x) 5)) trite-expression answer-old-phrase)
+                             ( list (lambda (x) (intersect? '(i you I me am are my your You) x) ) answer-change-pronoun trite-expression)
+                             ( list (lambda (x) (intersect? (keywords KEYWORDS-LIST) x )) keywords-strategy)
                       )
       )
       
       ;Задание №6 2. Пробегаемся по списку, выполняем предикат (первый элемент каждого подсписка),
-      ;если #t, следовательно, выполняем рандомную функцию, соответсвующую данному предикату, иначе ничего не делаем
-      ;переходим к другому подсписку
+      ;если #t, следовательно, выполняем рандомную функцию(вместо pick-random можно сделать выбор с некоторой вероятностью/весами),
+      ;соответствующую данному предикату, иначе ничего не делаем
+      ;После всегда переходим к другому подсписку
       (define (execute-strategy pred-func-lst client-response)
         (cond ((null? pred-func-lst) '())
               (else (let ((pred-func (car pred-func-lst)))
-                      ( if ((eval (car pred-func)) client-response)
-                           (let ((result ((eval(pick-random (cdr pred-func))) client-response)));вместо pick-random можно сделать выбор с некоторой вероятностью/весами
+                      ( if ((car pred-func) client-response)
+                           (let ((result ((pick-random (cdr pred-func)) client-response)))
                              (cond ((null? result) (execute-strategy (cdr pred-func-lst) client-response))
                                    (else (append result (execute-strategy (cdr pred-func-lst) client-response)))
                              )
@@ -161,22 +178,6 @@
       ;New version - with predicates
       (execute-strategy pred-F user-response
       )
- 
-      
-      ;Old version - without predicates
-      ;( cond ((equal? user-response '()) '(please go on))
-      ;       ( else
-      ;         (case (fifty-fifty)
-      ;           ( (0) (answer-change-pronoun user-response))
-      ;           ( (3) (answer-old-phrase user-response))
-      ;           ( (1) (trite-expression user-response))
-      ;           ( (2) ( let ((result (keywords-strategy user-response)))
-      ;                    (if (null? result) (trite-expression user-response) result)
-      ;                    )
-      ;                 )
-      ;           ( else '(Error)))
-      ;       )
-      ;)
     )
 
     (define (unique-push element vector)
@@ -197,9 +198,9 @@
       (cond ((equal? user-response '(goodbye))
              (printf "Goodbye, ~a!\n" name)
              (print '(see you next week))
-             (print old-phrases)
+             ;(print old-phrases) Можно распечатать список всех ответов клиента
              (newline))
-            (else (print old-phrases)
+            (else ;(print old-phrases)
                   (print (reply user-response))
                   ;standart push| old-phrases is a vector
                   ;(doctor-driver-loop name (cons user-response old-phrases)))))
@@ -226,52 +227,6 @@
         )
   )
 )
-
-
-     
-(define (test1 client-response)
-  (list
-   '(test1)
-  )
-)
-
-(define (test2 client-response)
-  (list
-   '(test2)
-  )
-)
-
-(define (test3 client-response)
-  (list
-   '(test3)
-  )
-)
-
-(define (test4 client-response)
-  (list
-   '(test4)
-  )
-)
-
-;(define (hedge)
-;        (pick-random '((please go on)
-;                       (many people have the same sorts of feelings)
-;                       (many of my patients have told me the same thing)
-;                       (please continue)
-;                       (can you say in more detail about your problem)
-;                       (Do you believe in what you said)
-;                       (We are on the right track)
-;                       (If you need anything, just ask)
-;                       (Make yourself at home)
-;                       (How long have you had these thoughts)
-;                       (If you could wave a magic wand what positive changes would you make happen in your life)))
-;      )
-
-; (define (trite-expression client-response)
-;   (list
-;    (hedge)
-;   )
-;)
 
 (define (replace replacement-pairs word)
   (cond ((null? replacement-pairs) word)
