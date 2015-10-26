@@ -80,19 +80,32 @@
 
       ;Задание №5. 5. Проверяет наличие word в списке lst
       (define (exist? word lst)
-        (cond ((null? lst) #f)
-              ((equal? word (car lst)) #t)
-              (else (exist? word (cdr lst)))
-         )
-      ) 
+          (and (not (null? lst))
+              ( or (equal? word (car lst))
+                   (exist? word (cdr lst))
+              )
+          )
+      )
       
       ;Задание №5. 4. Проверяем наличие word в первом подсписке keys, если есть,
       ;то возвращаем рандомный подсписок, отличный от первого(в котором хранятся ключевые слова)
       ;Если во втором подсписке списка keys есть символ '*, то выбираем произвольную фразу из (cdr keys)
       ;и вызываем функцию replace-all-words-in-lst
+
+      ;(define (check-keys word keys)
+      ;  (cond ((exist? word (car keys))
+      ;          (cond ((exist? '* (cadr keys)) (replace-all-words-in-lst word (pick-random (cdr keys))))
+      ;                ( else (pick-random (cdr keys)))
+      ;          )
+      ;        )
+      ;        (else '())
+      ;  )
+      ;)
+
+      ;Используем уже написанную функцию many-replace для замены * на ключевое слово
       (define (check-keys word keys)
         (cond ((exist? word (car keys))
-                (cond ((exist? '* (cadr keys)) (replace-all-words-in-lst word (pick-random (cdr keys))))
+                (cond ((exist? '* (cadr keys)) (many-replace (list(list '* word)) (pick-random (cdr keys))))
                       ( else (pick-random (cdr keys)))
                 )
               )
